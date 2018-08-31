@@ -1,0 +1,15 @@
+language: r
+sudo: required
+
+os:
+  - linux
+
+r_build_args: --no-build-vignettes --no-manual --no-resave-data
+r_check_args: --no-build-vignettes --no-manual
+
+r_binary_packages:
+  - devtools
+  - roxygen2
+
+after_success:
+  - Rscript -e 'devtools::install();library(bigmemory);library(methods);devtools::test()'
