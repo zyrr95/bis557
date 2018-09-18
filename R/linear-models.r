@@ -10,7 +10,7 @@
 #' fit <- linear_model(Sepal.Length ~., iris)
 #' summary(fit)
 #' @export
-linear_model <- function(formula, data) linear_model = function(formula,data){
+linear_model = function(formula,data){
   res = all.vars(formula)[1]
   if( all.vars(formula)[-1] == '.'){
     var = colnames(data)[colnames(data)!= res]
@@ -25,7 +25,8 @@ linear_model <- function(formula, data) linear_model = function(formula,data){
   beta[beta == 0] = NA
   fitted = X %*% beta
   residuals = Y - fitted
-  result = list(coefficients = beta, residuals = residuals, fitted.values = fitted, rank = ncol(x), weights = NULL, df.residual = nrow(X) - ncol(X), call = call('lm',formula), terms = terms(x = formula, data = data),contrasts = NA, xlelves = NA, offset = NA, y = Y, x = X, model = formula, na.action = NA, qr = qr(X))
+  result = list(coefficients = beta, residuals = residuals, fitted.values = fitted, rank = ncol(X), weights = NULL, df.residual = nrow(X) - ncol(X), call = call('lm',formula), terms = terms(x = formula, data = data),contrasts = NA, xlelves = NA, offset = NA, y = Y, x = X, model = formula, na.action = NA, qr = qr(X))
   class(result) = 'lm'
+  #browser()
   return(result)
 }
