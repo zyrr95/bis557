@@ -32,7 +32,24 @@ predict.ridge_reg = function(object,...) {
 #Calculating MSE
 
 ```{r}
-
+lambdas = seq(0.1, 100, by=0.1)
+MSEs = rep(NA, length(lambdas))
+for (i in 1:length(lambdas)){
+  fit = ridge_reg(y ~., lambda_seq[i], ridge_train)
+  error = ridge_test$y - predict(fit, ridge_test)
+  MSEs[i] = mean(error^2)
+}
 ```
+
+#Plotting MSEs
+```{r}
+plot(log(lambdas), MSEs, xlab = "Value of log(Lambda)", ylab = "Mean Squared Error", col="Red")
+```
+
+#Finding the Lambda With Minimum MSE
+```{r}
+lambdas[which.min(MSEs)]
+```
+
 
 
