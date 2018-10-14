@@ -13,6 +13,7 @@ output:
 -->
 
 ##Loading
+
 ```{r}
 library(bis557)
 data(ridge_train)
