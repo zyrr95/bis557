@@ -9,17 +9,17 @@ output:
 ---
 <!--
 %\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{The ridge regression vignette}
+%\VignetteIndexEntry{The Ridge Regression vignette}
 -->
 
-#Loading
+##Loading
 ```{r}
 library(bis557)
 data(ridge_train)
 data(ridge_test)
 ```
 
-#Rideg Regression Predict Function
+##Rideg Regression Predict Function
 
 ```{r}
 predict.ridge_reg = function(object,...) {
@@ -29,7 +29,7 @@ predict.ridge_reg = function(object,...) {
 }
 ```
 
-#Calculating MSE
+##Calculating MSE
 
 ```{r}
 lambdas = seq(0.1, 100, by=0.1)
@@ -41,12 +41,12 @@ for (i in 1:length(lambdas)){
 }
 ```
 
-#Plotting MSEs
+##Plotting MSEs
 ```{r}
 plot(log(lambdas), MSEs, xlab = "Value of log(Lambda)", ylab = "Mean Squared Error", col="Red")
 ```
 
-#Finding the Lambda With Minimum MSE
+##Finding the Lambda With Minimum MSE
 ```{r}
 lambdas[which.min(MSEs)]
 ```
