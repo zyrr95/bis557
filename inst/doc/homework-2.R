@@ -1,38 +1,16 @@
----
-title: "The Ridge Regression"
-author: "Yuren Zhang"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    self_contained: yes
-    toc: true
----
-<!--
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{The Ridge Regression vignette}
--->
-
-## Loading
-
-```{r}
+## ------------------------------------------------------------------------
 library(bis557)
 data(ridge_train)
 data(ridge_test)
-```
 
-## Ridge Regression Predict Function
-
-```{r}
+## ------------------------------------------------------------------------
 predict.ridge_reg = function(object,...) {
   newdata = list(...)[[1]]
   m = model.matrix(object$form, newdata)
   m %*% object$coefficients
 }
-```
 
-## Calculating MSE and Selecting the minimum one 
-
-```{r}
+## ------------------------------------------------------------------------
 lambdas = seq(0.1, 100, by=0.1)
 MSEs = rep(NA, length(lambdas))
 for (i in 1:length(lambdas)){
@@ -41,5 +19,4 @@ for (i in 1:length(lambdas)){
   MSEs[i] = mean(error^2)
 }
 lambdas[which.min(MSEs)]
-```
 
