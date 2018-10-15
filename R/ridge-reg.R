@@ -10,7 +10,6 @@
 #' fit <- ridge_reg(Sepal.Length ~.,1, iris)
 #' summary(fit)
 #' @export
-
 ridge_reg = function(form, lambda, data){
     rownames(data) = NULL
     m = model.matrix(form, data)
