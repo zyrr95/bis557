@@ -7,11 +7,11 @@
 ridge_reg(form, lambda, data)
 }
 \arguments{
+\item{form}{a formula}
+
 \item{lambda}{a penalty parameter}
 
 \item{data}{a data.frame}
-
-\item{formula}{a formula}
 }
 \value{
 An ridge_reg object
