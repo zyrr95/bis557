@@ -2,5 +2,6 @@
 
 export(linear_model)
 export(ridge_reg)
-importFrom(stats,lm)
+importFrom(stats,as.formula)
 importFrom(stats,model.matrix)
+importFrom(stats,terms)
