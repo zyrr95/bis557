@@ -1,0 +1,134 @@
+---
+title: "Homework-3"
+author: "Yuren Zhang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: yes
+    toc: true
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{The ridge regression vignette}
+-->
+
+
+##p117.7
+
+```{r}
+set.seed(1)
+x = runif(100)
+e = rnorm(100, sd = 1/3)
+y = sin(4*x) + e
+
+data_1 = data.frame(x,y)
+
+
+kt = function(t = 0){
+  
+  w = 0.75*(1-t^2)
+  k = ifelse(w >= 0, w, 0)
+  return(k)
+}
+
+kernel_e = function(origin = 0.6, h = 0.15, data = data_1){
+  subset_x = data[data[,1]> (origin - h) & data[,1] < (origin + h) ,1]
+  subset_y = data[data[,1]> (origin - h) & data[,1] < (origin + h) ,2]
+  
+  ybar = mean(sapply(1:length(subset_x), function(i) kt(subset_x[i] - origin) * subset_y[i]))
+  return(ybar)
+}
+```
+
+
+```{R}
+#' Fit a kernel
+#'
+#' @description This function passes parameters to the kernel function.
+#' @param x training data
+#' @param h bandwidth
+#' @param x_new test data
+#' @return fitted data
+#' @importFrom stats as.formula model.matrix terms
+#' @examples
+#' kern_density(runif(100),0.15,seq(0,1, by = 0.1))
+#' @export
+kern_density = function(x,h,x_new){
+  
+   set.seed(1)
+   x = x
+   e = rnorm(100, sd = 1/3)
+   y = sin(4*x) + e
+  
+   data_2 = data.frame(x,y)
+
+  x_kernel_e = x_new
+  y_kernel_e = sapply(1:length(x_kernel_e), function(i) kernel_e(x_kernel_e[i],h,data = data_2))
+  
+  plot(x,y, ylab = "Density",main = "Kernel Density Estimation")
+  curve(sin(4*x),add = TRUE, col = "green")
+  lines(x_kernel_e,y_kernel_e, col = "red")
+  legend("topleft", legend=c("test data", "train data"),
+       col=c("red", "green"), lty=1:2, cex=0.8)
+  return(y_kernel_e)
+}
+
+kern_density(runif(100),0.15,seq(0,1, by = 0.1))
+kern_density(runif(100),0.3,seq(0,1, by = 0.1))
+kern_density(runif(100),0.5,seq(0,1, by = 0.1))
+```
+
+
+##p200.3
+The definition of convex function is that for
+$$
+0≤\lambda≤1~,~f(λx+(1−λ)x)≤λf(x)+(1−λ)f(x)
+$$
+If we have two convex funtion h and g, then we have 
+$$
+ f(λx+(1−λ)x)=h(λx+(1−λ)x)+g(λx+(1−λ)x)≤λ(h(x)+g(x))+(1−λ)(h(x)+g(x))
+$$
+
+##p200.4
+using the result from p200.3, we have a function $f(αx+βy)	=	|αx+βy|$ where $\alpha$ = $\lambda$ and $\beta$ = 1 - $\lambda$
+thus, using the result from p200.3 we have $f(αx+βy)	=	|αx+βy| = |αx|+|βy|$ which is $≤αf(x)+βf(y)$. Then the absolute value function is a convex function
+
+
+$l_1$ norm is defined as $\sum_{i=1}^{n} |x_i| $. Thus, from previous part we see that all absolute functions and their sums are convex hence the $l_1$ norm is also convex. 
+
+##p200.5
+We can divide the elastic net funciton to 3 parts for an easier proof
+Part 1 : $\frac{1}{2n}||y-Xb||^2_2$ which is $\frac{1}{2n}$ times a $l_2$ norm that is convex
+Part 2 : $(1-\alpha)\frac{1}{2}||b||^2_2$ which is $(1-\alpha)\frac{1}{2}$ times a $l_2$ norm that is convex. 
+Part 3 : $\alpha||b||_1$ which is $\alpha$ times a $l_1$ norm and is still convex.
+So that all 3 parts are convex and their sum will be convex as proved in p200.3. Thus the elastic net function is convex. 
+
+##p200.6
+
+```{r}
+
+# KKT condition function
+check_kkt <- function(y, X, b, lambda) {
+  resids <- y - X %*% b 
+  s <- apply(X, 2, function(xj) crossprod(xj, resids)) / lambda / nrow(X)
+  (b == 0) & (abs(s) >= 1)
+}
+library(glmnet)
+
+# use iris as dataset
+x <- scale(model.matrix(Sepal.Length ~. -1, iris))
+y <- iris[,1]
+
+# implement lasso (set alpha to 0)
+library(glmnet)
+lasso_reg_with_screening <- function(x, y){
+  m1 <- cv.glmnet(x,y,alpha=1)
+  lambda <- m1$lambda.1se
+  b <- m1$glmnet.fit$beta[, m1$lambda == lambda]
+  print(b)
+  check_kkt(y, x, b, lambda)
+}
+lasso_reg_with_screening(x, y)
+```
+
+Given that the KTT returns False for all coefficients, there is no violation. 
