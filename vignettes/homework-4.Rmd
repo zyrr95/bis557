@@ -69,20 +69,3 @@ irwls_glm <- function(X, y, family, maxit=25, tol=1e-10, lambda){
   beta
 }
 ```
-
-##Q3
-
-```{r}
-sparse_add <-function(a, b){
-  c <-merge(a, b, by =c("i", "j"), all = TRUE, suffixes =c("1", "2")
-  )
-  c$x1[is.na(c$x1)] <- 0
-  c$x2[is.na(c$x2)] <- 0
-  c$x <- c$x1+c$x2c[,c("i", "j", "x")]
-}
-
-a <-data.frame(i =c(1, 2), j =c(1, 1), x =c(3, 1))
-b <-data.frame(i =c(1, 2, 2), j =c(1, 1, 2), x =c(4.4, 1.2, 3))
-sparse_add(a, b)
-```
-
