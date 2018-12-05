@@ -1,0 +1,88 @@
+---
+title: "Homework 4"
+author: "Yuren Zhang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: yes
+    toc: true
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{homework 4 vignette}
+-->
+
+## 5.8.2
+
+From CASL equation 2.73, 
+$$cond(A)=\frac{\sigma_{max}}{\sigma_{min}}$$
+$\sigma_{max}$: the largest singular value
+$\sigma_{min}$: the smallest singular value
+
+From CASL 2.77
+```{r}
+X <- matrix(c(1, 2, 2, 1), 2, 2)
+p <- c(0.5, 0.0000001)
+```
+
+Then the condition number of $X'X$ is
+```{r}
+svals <- svd(t(X)%*%X)[["d"]]
+max(svals)/min(svals)
+```
+
+From CASL 5.28
+The Hessian matrix for Bernoulli random Variable is 
+$$X'diag(p(1-p))X$$
+The condition number of this Hessian matrix is 
+```{r}
+H = t(X)%*%diag(p*(1-p))%*%X
+svals2 <- svd(H)[["d"]]
+max(svals2)/min(svals2)
+```
+
+Comparing the Hessian Matrix of logistic variation $X'diag(p(1-p))X$ and linear Hessian $X'X$, we can see that the former one is much larger than the latter one. Thus the linear Hessian is well conditioned.
+
+##5.8.4
+From CASL p127
+```{r}
+# Inputs: X a numeric design matrix; y numeric vector;
+# family, an instance of a family object;
+# maxit, integer maximum iterations; tol, stopping
+# criterion tolerance
+# Output: estimate of the GLM regression vector
+irwls_glm <- function(X, y, family, maxit=25, tol=1e-10, lambda){
+  beta <- rep(0,ncol(X))
+  for(j in 1:maxit){
+    b_old <- beta
+    eta   <- X %*% beta
+    mu    <- family$linkinv(eta)
+    mu_p  <- family$mu.eta(eta)
+    z     <- eta + (y - mu) / mu_p
+    W     <- as.numeric(mu_p^2 / family$variance(mu))
+    XtX   <- crossprod(X, diag(W) %*% X)
+    Xtz   <- crossprod(X, W * z)
+    V <- XtX + diag(lambda, dim(XtX)[1])
+    beta  <- solve(V, Xtz)
+    if(sqrt(crossprod(beta - b_old)) < tol) break
+  }
+  beta
+}
+```
+
+##Q3
+
+```{r}
+sparse_add <-function(a, b){
+  c <-merge(a, b, by =c("i", "j"), all = TRUE, suffixes =c("1", "2")
+  )
+  c$x1[is.na(c$x1)] <- 0
+  c$x2[is.na(c$x2)] <- 0
+  c$x <- c$x1+c$x2c[,c("i", "j", "x")]
+}
+
+a <-data.frame(i =c(1, 2), j =c(1, 1), x =c(3, 1))
+b <-data.frame(i =c(1, 2, 2), j =c(1, 1, 2), x =c(4.4, 1.2, 3))
+sparse_add(a, b)
+```
+
