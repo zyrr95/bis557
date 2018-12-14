@@ -133,6 +133,7 @@ sparse_add(a,a)
 
 then multiply function:
 ```{r}
+sparse_multi = function(a,b){
  if (!identical(a[[2]][2],b[[2]][1]))
     stop("non-conformable arguments")
   if (!inherits(a, "sparse.matrix"))
