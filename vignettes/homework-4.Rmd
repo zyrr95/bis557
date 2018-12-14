@@ -128,7 +128,7 @@ sparse_add = function(a, b){
 
 an example will be
 ```{r}
-sparse_add(a,b)
+sparse_add(a,a)
 ```
 
 then multiply function:
