@@ -97,7 +97,7 @@ an example will be:
 ```{r}
 a = sparse.matrix(i = c(1, 2), j = c(1, 1), x = c(1, 1))
 b = sparse.matrix(i = c(3, 2), j = c(2, 1), x = c(1, 4))
-c = sparse.matrix(i = 1:3, j = 1:3, x = 1:3)
+c = sparse.matrix(i = 1, j = 1, x = 1)
 ```
 
 then addition function:
@@ -110,17 +110,17 @@ then addition function:
 
 sparse_add = function(a, b){
 # making sure the format is correct
-  if (!identical(dim(a),dim(b)))
+    if (!identical(a[[2]],b[[2]]))
     stop("non-conformable arrays")
   if (!inherits(a, "sparse.matrix"))
     stop ("a is not a sparse.matrix object")
   if (!inherits(b, "sparse.matrix"))
-    stop ("b is not a sparse.matrix object")
+   stop ("b is not a sparse.matrix object")
   c = merge(a[[1]], b[[1]], by = c("i", "j"), all = TRUE, suffixes = c("1", "2"))
   c$x1[is.na(c$x1)] = 0
   c$x2[is.na(c$x2)] = 0
   c$x = c$x1 + c$x2
-  c = c[, c("i", "j", "x")]
+  c[, c("i", "j", "x")]
   c = sparse.matrix(c$i, c$j, c$x, dims = a[[2]])
   return(c)
 }
@@ -133,21 +133,12 @@ sparse_add(a,b)
 
 then multiply function:
 ```{r}
-#' @description create sparse matrix multiply method.
-#' @param a a sparse matrix
-#' @param b a sparse matrix
-#' @return A sparse.matrix object a %*% b
-#' @export
-
-
-sparse_multi = function(a, b){
-  
-  if ((dim(a)[2] != dim(b)[1]))
+ if (!identical(a[[2]][2],b[[2]][1]))
     stop("non-conformable arguments")
   if (!inherits(a, "sparse.matrix"))
     stop ("a is not a sparse.matrix object")
   if (!inherits(b, "sparse.matrix"))
-    stop ("b is not a sparse.matrix object")
+   stop ("b is not a sparse.matrix object")
   
 #from CASL p294 to 295 casl_sparse_multiply we have
   
