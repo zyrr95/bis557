@@ -167,7 +167,7 @@ sparse_multi = function(a, b){
 
 an example will be:
 ```{r}
-spase_multi(a,b)
+sparse_multi(a,b)
 ```
 
 last, transpose:
