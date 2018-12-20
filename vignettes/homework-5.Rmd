@@ -177,6 +177,9 @@ fit(x_train, y_train, epochs = 10,
 We see that there is a slight increase of about 1.5%. 
 
 #3
+```{r}
+library(ggplot2)
+```
 
 First, generate dataset, from CASL p216 we have
 ```{r}
@@ -187,7 +190,7 @@ To generate large outliers, we select random locations and add or minus 100, ref
 
 ```{r}
 toreplace <- sample(x = seq_along(X), size = 5, replace = FALSE)
-X[toreplace] <- runif(n = 5, min = -100, max = 100)
+X[toreplace] <- runif(n = 5, min = -10, max = 10)
 y <- X[,1,drop = FALSE]^2 + rnorm(1000, sd = 0.1)
 ```
 
@@ -382,6 +385,40 @@ casl_nn_predict <- function(weights, X_test) {
 }
 ```
 
+```{r}
+weights = casl_nn_sgd(X, y, sizes = c(1, 25, 1), epochs=10, eta=0.01)
+y_pred_mad = casl_nn_predict(weights, X)
+```
 
+update loss function to mse and see results 
 
+```{r}
+# Derivative of the mean squared error (MSE) function.
+#
+# Args:
+#     y: A numeric vector of responses.
+#     a: A numeric vector of predicted responses.
+#
+# Returns:
+#     Returned current derivative the MSE function.
+# 
+casl_util_mse_p <- function(y, a) {
+  (a - y)
+}
+```
 
+```{r}
+weights = casl_nn_sgd(X, y, sizes = c(1, 25, 1), epochs=10, eta=0.01)
+y_pred_mse = casl_nn_predict(weights, X)
+```
+
+combine predictions to compare
+```{r}
+result = data.frame(x = X[,1], y = y, y_mse = y_pred_mse, y_mad = y_pred_mad)
+ggplot(result) + 
+  geom_point(aes(x = X, y = y)) +
+  geom_line(aes(x = x, y = y_pred_mse, color="blue")) +
+  geom_line(aes(x = x, y = y_pred_mad, color="red")) +  
+  scale_color_discrete(name = "Loss Function", labels = c("MAD", "MSE"))
+  
+```
