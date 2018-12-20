@@ -1,0 +1,171 @@
+---
+title: "Homework-5"
+author: "Yuren Zhang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: yes
+    toc: true
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{The Lasso Handwritting Recognization}
+-->
+
+#1.
+##a. Loading required packages
+```{r}
+library(keras)
+library(glmnet)
+library(doMC)
+```
+
+##b.Preparing parallel and set seed
+```{r}
+registerDoMC(cores = 4)
+
+set.seed(123)
+```
+
+##c. shuffle and split data into training and test
+
+```{r}
+mnist <- dataset_mnist()
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+
+x_train <- array_reshape(x_train, c(60000, 28^2))
+x_test <- array_reshape(x_test, c(10000, 28^2))
+y_train <- factor(y_train)
+y_test <- factor(y_test)
+```
+
+##d. the original accuracy
+
+```{r}
+s <- sample(seq_along(y_train), 1000)
+fit <- cv.glmnet(x_train[s,], y_train[s], alpha = 1,family = "multinomial",parallel = TRUE,nfolds = 5)
+preds <- predict(fit$glmnet.fit, x_test, s = fit$lambda.min, 
+                 type = "class",parallel = TRUE)
+
+t <- table(as.vector(preds), y_test)
+sum(diag(t)) / sum(t)
+```
+
+##e. extracting features
+```{r}
+mt = as.matrix(coef(fit))
+co = cbind(mt[[1]],mt[[2]],mt[[3]],mt[[4]],mt[[5]],mt[[6]],mt[[7]],mt[[8]],mt[[9]],mt[[10]])
+co_m = as.matrix(co)
+df = as.data.frame(co_m)[-1,]
+rownames(df) = 1:dim(df)[1]
+df_r = df[rowSums(df)>0,]
+
+x_train = x_train[,as.numeric(rownames(df_r))]
+x_test = x_test[,as.numeric(rownames(df_r))]
+```
+
+##f. run new predictions
+
+```{r}
+fit <- cv.glmnet(x_train[s,], y_train[s], alpha = 0,family = "multinomial",parallel = TRUE,nfolds = 5)
+
+preds <- predict(fit$glmnet.fit, x_test, s = fit$lambda.min, 
+                 type = "class",parallel = TRUE)
+
+
+t <- table(as.vector(preds), y_test)
+sum(diag(t)) / sum(t)
+```
+
+We can see that there is a small increase in the prediction accuracy.
+
+#2. 
+Disclaimer: The data used is mnist dataset
+
+
+From the book 8.10.4 we have the original neural net:
+
+```{r}
+model <- keras_model_sequential()
+model %>%
+  layer_conv_2d(filters = 32, kernel_size = c(2,2),
+input_shape = c(28, 28, 1),
+                padding = "same") %>%
+layer_activation(activation = "relu") %>%
+  layer_conv_2d(filters = 32, kernel_size = c(2,2),
+              padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_dropout(rate = 0.5) %>%
+layer_conv_2d(filters = 32, kernel_size = c(2,2),
+              padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_conv_2d(filters = 32, kernel_size = c(2,2),
+padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_dropout(rate = 0.5) %>%
+layer_flatten() %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dropout(rate = 0.5) %>%
+layer_dense(units = 26) %>%
+layer_activation(activation = "softmax")
+
+model %>% compile(loss = 'categorical_crossentropy',
+                  optimizer = optimizer_rmsprop(),
+                  metrics = c('accuracy'))
+model %>%
+fit(x_train, y_train, epochs = 10,
+    validation_data = list(x_test, y_test))
+```
+
+Tuning the old model by changeing layer size to (3,3) and dropout rate to 0.25 to get better accuracy:
+
+```{r}
+model1 <- keras_model_sequential()
+model1 %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3),
+input_shape = c(28, 28, 1),
+                padding = "same") %>%
+layer_activation(activation = "relu") %>%
+  layer_conv_2d(filters = 32, kernel_size = c(2,2),
+              padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_dropout(rate = 0.25) %>%
+layer_conv_2d(filters = 32, kernel_size = c(2,2),
+              padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_conv_2d(filters = 32, kernel_size = c(2,2),
+padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+layer_dropout(rate = 0.25) %>%
+layer_flatten() %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dropout(rate = 0.25) %>%
+layer_dense(units = 26) %>%
+layer_activation(activation = "softmax")
+
+model1 %>% compile(loss = 'categorical_crossentropy',
+                  optimizer = optimizer_rmsprop(),
+                  metrics = c('accuracy'))
+model1 %>%
+fit(x_train, y_train, epochs = 10,
+    validation_data = list(x_test, y_test))
+```
+
+We see that there is a slight increase of about 1.5%. 
+
+#3
+
+
