@@ -16,6 +16,8 @@ output:
 ##a. Loading required packages
 ```{r}
 library(keras)
+install_keras()
+library(keras)
 library(glmnet)
 library(doMC)
 ```
