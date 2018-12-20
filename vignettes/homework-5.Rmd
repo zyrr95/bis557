@@ -86,9 +86,9 @@ We can see that there is a small increase in the prediction accuracy.
 
 #2. 
 Disclaimer: The data used is mnist dataset
+Code was Not evaluated on Travis. 
 
 
-From the book 8.10.4 we have the original neural net:
 ```{r}
 x_train = as.matrix(x_train)
 x_test = as.matrix(x_test)
@@ -96,7 +96,9 @@ y_train = as.matrix(y_train)
 y_test = as.matrix(y_test)
 ```
 
-```{r}
+From the book 8.10.4 we have the original neural net:
+
+```{r,eval= FALSE}
 model <- keras_model_sequential()
 model %>%
   layer_conv_2d(filters = 32, kernel_size = c(2,2),
@@ -135,7 +137,7 @@ fit(x_train, y_train, epochs = 10,
 
 Tuning the old model by changeing layer size to (3,3) and dropout rate to 0.25 to get better accuracy:
 
-```{r}
+```{r, eval=FALSE}
 model1 <- keras_model_sequential()
 model1 %>%
   layer_conv_2d(filters = 32, kernel_size = c(3,3),
@@ -179,9 +181,15 @@ We see that there is a slight increase of about 1.5%.
 First, generate dataset, from CASL p216 we have
 ```{r}
 X <- matrix(runif(1000, min=-1, max=1), ncol=1)
+```
+
+To generate large outliers, we select random locations and add or minus 100, reference:https://stat.ethz.ch/pipermail/r-help/2010-October/254822.html
+
+```{r}
+toreplace <- sample(x = seq_along(X), size = 5, replace = FALSE)
+X[toreplace] <- runif(n = 5, min = -100, max = 100)
 y <- X[,1,drop = FALSE]^2 + rnorm(1000, sd = 0.1)
 ```
 
-To generate large outliers, we select random locations and add or minus 100, reference: 
 
 
